@@ -10,7 +10,7 @@ let offsetX = 0;
 let offsetY = 0;
 
 // CUERDA MÁS FLOJA Y LARGA
-const maxLength = 500;   // longitud máxima antes de tensarse
+const maxLength = 1000;   // longitud máxima antes de tensarse
 const stiffness = 0.02;  // cuanto menor, más suave
 
 function getCenter(el) {
@@ -35,7 +35,7 @@ function updateRope(applyPhysics = true) {
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
   // curvatura máxima
-  const curveAmount = Math.min(60, dist * 0.15);
+  const curveAmount = Math.min(100, dist * 0.15);
 
   // vector perpendicular normalizado (que siempre curve hacia abajo)
   const nx = -dy / dist;
@@ -192,6 +192,7 @@ board.addEventListener("touchstart", startDrag, { passive: false });
 window.addEventListener("touchmove", moveDrag, { passive: false });
 window.addEventListener("touchend", endDrag, { passive: false });
 window.addEventListener("touchcancel", endDrag, { passive: false });
+window.addEventListener("blur", endDrag);
 
 // inicio
 window.addEventListener("load", () => {
