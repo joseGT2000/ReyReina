@@ -144,6 +144,12 @@ function startDrag(e) {
   if (!target.classList.contains("piece")) return;
 
   e.preventDefault();
+
+  // si ya había una pieza siendo arrastrada, la soltamos
+  if (dragging) {
+    dragging.style.cursor = "grab";
+  }
+
   dragging = target;
 
   const point = getPointFromEvent(e);
@@ -156,6 +162,7 @@ function startDrag(e) {
 }
 
 function moveDrag(e) {
+  if (!dragging || !board.contains(dragging)) return;
   if (!dragging) return;
 
   e.preventDefault();
@@ -204,4 +211,7 @@ function animate() {
   updateRope(true);
   requestAnimationFrame(animate);
 }
-animate();
+function animate() {
+  updateRope(dragging !== null); // solo aplica física si se arrastra
+  requestAnimationFrame(animate);
+}
