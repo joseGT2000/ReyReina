@@ -1,0 +1,59 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+}
+
+#board {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #1e1e2f; /* fondo plano */
+  overflow: hidden;
+}
+
+/* piezas */
+.piece {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  color: #f5f5f5;
+}
+
+/* posiciones iniciales */
+#king {
+  left: 20%;
+  top: 40%;
+}
+
+#queen {
+  left: 60%;
+  top: 50%;
+}
+
+/* cuerda (línea) */
+#rope-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* no bloquea el ratón */
+}
+
+#rope {
+  stroke: #f0c674;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
