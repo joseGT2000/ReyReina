@@ -25,8 +25,8 @@ html, body {
 /* piezas */
 .piece {
   position: absolute;
-  width: 9000px;
-  height: 9000px;
+  width: 90px;
+  height: 90px;
   font-size: 48px;
   display: flex;
   align-items: center;
