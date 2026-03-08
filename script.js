@@ -50,25 +50,25 @@ function updateRope(applyPhysics = true) {
   if (!applyPhysics) return;
 
   // ---- tu parte de física anterior (tensión) ----
-  if (dist > maxLength) {
-    const excess = dist - maxLength;
-    const nxLine = dx / dist;
-    const nyLine = dy / dist;
+  // ---- nueva lógica: solo limita la pieza que se arrastra ----
+if (dragging && dist > maxLength) {
+  const otherPiece = dragging === king ? queen : king;
+  const otherCenter = getCenter(otherPiece);
+  const dragCenter = getCenter(dragging);
 
-    const corr = excess * stiffness;
+  const dxLimit = dragCenter.x - otherCenter.x;
+  const dyLimit = dragCenter.y - otherCenter.y;
+  const distLimit = Math.sqrt(dxLimit * dxLimit + dyLimit * dyLimit);
 
-    movePieceByCenter(
-      king,
-      kc.x + nxLine * corr * 0.5,
-      kc.y + nyLine * corr * 0.5,
-      true
-    );
-    movePieceByCenter(
-      queen,
-      qc.x - nxLine * corr * 0.5,
-      qc.y - nyLine * corr * 0.5,
-      true
-    );
+    if (distLimit > maxLength) {
+      // colocamos la pieza arrastrada exactamente en el límite
+      const nxLimit = dxLimit / distLimit;
+      const nyLimit = dyLimit / distLimit;
+      const newX = otherCenter.x + nxLimit * maxLength;
+      const newY = otherCenter.y + nyLimit * maxLength;
+  
+      movePieceByCenter(dragging, newX, newY, true);
+    }
   }
 }
 
