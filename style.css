@@ -57,6 +57,5 @@ body, html {
   stroke: #f0c674;
   stroke-width: 4;
   stroke-linecap: round;
-  fill: none; /* importante para que no se rellene */
 }
 
