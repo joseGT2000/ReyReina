@@ -26,29 +26,52 @@ function updateRope(applyPhysics = true) {
   const kc = getCenter(king);
   const qc = getCenter(queen);
 
-  rope.setAttribute("x1", kc.x);
-  rope.setAttribute("y1", kc.y);
-  rope.setAttribute("x2", qc.x);
-  rope.setAttribute("y2", qc.y);
-
-  if (!applyPhysics) return;
+  // punto medio entre rey y reina
+  const midX = (kc.x + qc.x) / 2;
+  const midY = (kc.y + qc.y) / 2;
 
   const dx = qc.x - kc.x;
   const dy = qc.y - kc.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-  // SOLO si está más lejos que maxLength aplicamos "tensión"
+  // curvatura máxima
+  const curveAmount = Math.min(60, dist * 0.15);
+
+  // vector perpendicular normalizado (que siempre curve hacia abajo)
+  const nx = -dy / dist;
+  const ny = dx / dist;
+
+  const cx = midX + nx * curveAmount;
+  const cy = midY + ny * curveAmount;
+
+  const d = `M ${kc.x} ${kc.y} Q ${cx} ${cy} ${qc.x} ${qc.y}`;
+  rope.setAttribute("d", d);
+
+  if (!applyPhysics) return;
+
+  // ---- tu parte de física anterior (tensión) ----
   if (dist > maxLength) {
     const excess = dist - maxLength;
-    const nx = dx / dist;
-    const ny = dy / dist;
+    const nxLine = dx / dist;
+    const nyLine = dy / dist;
 
     const corr = excess * stiffness;
 
-    movePieceByCenter(king, kc.x + nx * corr * 0.5, kc.y + ny * corr * 0.5, true);
-    movePieceByCenter(queen, qc.x - nx * corr * 0.5, qc.y - ny * corr * 0.5, true);
+    movePieceByCenter(
+      king,
+      kc.x + nxLine * corr * 0.5,
+      kc.y + nyLine * corr * 0.5,
+      true
+    );
+    movePieceByCenter(
+      queen,
+      qc.x - nxLine * corr * 0.5,
+      qc.y - nyLine * corr * 0.5,
+      true
+    );
   }
 }
+
 
 function movePieceByCenter(el, centerX, centerY, fromPhysics = false) {
   const rect = el.getBoundingClientRect();
