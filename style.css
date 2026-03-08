@@ -20,9 +20,9 @@ body, html {
 /* piezas */
 .piece {
   position: absolute;
-  width: 60px;
-  height: 60px;
-  font-size: 48px;
+  width: 90px;         
+  height: 90px;        
+  font-size: 72px;     
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,6 +30,7 @@ body, html {
   user-select: none;
   color: #f5f5f5;
 }
+
 
 /* posiciones iniciales */
 #king {
