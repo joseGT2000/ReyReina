@@ -3,16 +3,15 @@ const queen = document.getElementById("queen");
 const rope = document.getElementById("rope");
 const board = document.getElementById("board");
 
-const STORAGE_KEY = "chess_rope_positions_v3";
+const STORAGE_KEY = "chess_rope_positions_v2";
 
 let dragging = null;
-let startPointerX = 0;
-let startPointerY = 0;
-let startLeft = 0;
-let startTop = 0;
+let offsetX = 0;
+let offsetY = 0;
 
-// cuerda: solo limite, no “resorte”
-const maxLength = 500; // cambia esto si quieres más o menos longitud
+// CUERDA MÁS FLOJA Y LARGA
+const maxLength = 500;   // longitud máxima antes de tensarse
+const stiffness = 0.02;  // cuanto menor, más suave
 
 function getCenter(el) {
   const rect = el.getBoundingClientRect();
@@ -23,76 +22,51 @@ function getCenter(el) {
   };
 }
 
-function updateRope() {
+function updateRope(applyPhysics = true) {
   const kc = getCenter(king);
   const qc = getCenter(queen);
 
-  // punto medio entre rey y reina
-  const midX = (kc.x + qc.x) / 2;
-  const midY = (kc.y + qc.y) / 2;
+  rope.setAttribute("x1", kc.x);
+  rope.setAttribute("y1", kc.y);
+  rope.setAttribute("x2", qc.x);
+  rope.setAttribute("y2", qc.y);
 
-  // calculamos una pequeña curvatura hacia abajo
+  if (!applyPhysics) return;
+
   const dx = qc.x - kc.x;
   const dy = qc.y - kc.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
-  // cuanto mayor la distancia, más “panza” hace la cuerda
-  const curveAmount = Math.min(60, dist * 0.15); // ajusta a gusto
+  // SOLO si está más lejos que maxLength aplicamos "tensión"
+  if (dist > maxLength) {
+    const excess = dist - maxLength;
+    const nx = dx / dist;
+    const ny = dy / dist;
 
-  // vector perpendicular normalizado (para curvar la cuerda)
-  const nx = -dy / (dist || 1);
-  const ny = dx / (dist || 1);
+    const corr = excess * stiffness;
 
-  // control point = punto medio + perpendicular * curva
-  const cx = midX + nx * curveAmount;
-  const cy = midY + ny * curveAmount;
-
-  // path cuadrático Bézier: M inicio, Q control, fin
-  const d = `M ${kc.x} ${kc.y} Q ${cx} ${cy} ${qc.x} ${qc.y}`;
-  rope.setAttribute("d", d);
+    movePieceByCenter(king, kc.x + nx * corr * 0.5, kc.y + ny * corr * 0.5, true);
+    movePieceByCenter(queen, qc.x - nx * corr * 0.5, qc.y - ny * corr * 0.5, true);
+  }
 }
 
-function clampToBoard(left, top, el) {
-  const boardRect = board.getBoundingClientRect();
+function movePieceByCenter(el, centerX, centerY, fromPhysics = false) {
   const rect = el.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
-
-  let clampedLeft = Math.max(0, Math.min(boardRect.width - width, left));
-  let clampedTop = Math.max(0, Math.min(boardRect.height - height, top));
-
-  return { left: clampedLeft, top: clampedTop };
-}
-
-// limita SOLO la pieza que se está moviendo si supera maxLength
-function enforceMaxDistance(movingPiece) {
-  const otherPiece = movingPiece === king ? queen : king;
-  const mc = getCenter(movingPiece);
-  const oc = getCenter(otherPiece);
-
-  const dx = mc.x - oc.x;
-  const dy = mc.y - oc.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-
-  if (dist <= maxLength || dist === 0) return;
-
-  const nx = dx / dist;
-  const ny = dy / dist;
-
-  // colocamos la pieza movida exactamente en el círculo de radio maxLength
-  const newX = oc.x + nx * maxLength;
-  const newY = oc.y + ny * maxLength;
-
   const boardRect = board.getBoundingClientRect();
-  const rect = movingPiece.getBoundingClientRect();
+  let left = centerX - rect.width / 2;
+  let top = centerY - rect.height / 2;
 
-  let left = newX - rect.width / 2;
-  let top = newY - rect.height / 2;
+  // límites
+  left = Math.max(0, Math.min(boardRect.width - rect.width, left));
+  top = Math.max(0, Math.min(boardRect.height - rect.height, top));
 
-  const clamped = clampToBoard(left, top, movingPiece);
-  movingPiece.style.left = clamped.left + "px";
-  movingPiece.style.top = clamped.top + "px";
+  el.style.left = `${left}px`;
+  el.style.top = `${top}px`;
+
+  if (!fromPhysics) updateRope(false);
 }
+
+// ---------- localStorage ----------
 
 function savePositions() {
   const kingRect = king.getBoundingClientRect();
@@ -116,26 +90,26 @@ function savePositions() {
 function loadPositions() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
-    updateRope();
+    updateRope(false); // solo dibujar cuerda con posiciones por defecto
     return;
   }
   try {
     const data = JSON.parse(saved);
     if (data.king && data.queen) {
-      king.style.left = data.king.left + "px";
-      king.style.top = data.king.top + "px";
-      queen.style.left = data.queen.left + "px";
-      queen.style.top = data.queen.top + "px";
+      king.style.left = `${data.king.left}px`;
+      king.style.top = `${data.king.top}px`;
+      queen.style.left = `${data.queen.left}px`;
+      queen.style.top = `${data.queen.top}px`;
     }
   } catch (e) {
     console.error("Error al leer posiciones guardadas", e);
   }
-  updateRope();
+  updateRope(false);
 }
 
-// ---------- eventos puntero (ratón + touch) ----------
+// ---------- helpers de puntero (ratón + touch) ----------
 
-function getCoords(e) {
+function getPointFromEvent(e) {
   if (e.touches && e.touches.length > 0) {
     return { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }
@@ -149,13 +123,11 @@ function startDrag(e) {
   e.preventDefault();
   dragging = target;
 
-  const point = getCoords(e);
+  const point = getPointFromEvent(e);
   const rect = target.getBoundingClientRect();
 
-  startPointerX = point.x;
-  startPointerY = point.y;
-  startLeft = rect.left;
-  startTop = rect.top;
+  offsetX = point.x - rect.left;
+  offsetY = point.y - rect.top;
 
   target.style.cursor = "grabbing";
 }
@@ -164,22 +136,19 @@ function moveDrag(e) {
   if (!dragging) return;
 
   e.preventDefault();
-  const point = getCoords(e);
+  const point = getPointFromEvent(e);
   const boardRect = board.getBoundingClientRect();
 
-  const deltaX = point.x - startPointerX;
-  const deltaY = point.y - startPointerY;
+  let left = point.x - boardRect.left - offsetX;
+  let top = point.y - boardRect.top - offsetY;
 
-  let left = startLeft + deltaX - boardRect.left;
-  let top = startTop + deltaY - boardRect.top;
+  left = Math.max(0, Math.min(boardRect.width - dragging.offsetWidth, left));
+  top = Math.max(0, Math.min(boardRect.height - dragging.offsetHeight, top));
 
-  const clamped = clampToBoard(left, top, dragging);
-  dragging.style.left = clamped.left + "px";
-  dragging.style.top = clamped.top + "px";
+  dragging.style.left = `${left}px`;
+  dragging.style.top = `${top}px`;
 
-  // limitar distancia si supera maxLength, sin mover la otra pieza
-  enforceMaxDistance(dragging);
-  updateRope();
+  updateRope(false);
 }
 
 function endDrag(e) {
@@ -190,10 +159,12 @@ function endDrag(e) {
   savePositions();
 }
 
+// ratón
 board.addEventListener("mousedown", startDrag);
 window.addEventListener("mousemove", moveDrag);
 window.addEventListener("mouseup", endDrag);
 
+// táctil
 board.addEventListener("touchstart", startDrag, { passive: false });
 window.addEventListener("touchmove", moveDrag, { passive: false });
 window.addEventListener("touchend", endDrag, { passive: false });
@@ -204,4 +175,9 @@ window.addEventListener("load", () => {
   loadPositions();
 });
 
-// ya no necesitamos física continua; solo dibuja cuerda
+// animación (tensión solo cuando se pasa de maxLength)
+function animate() {
+  updateRope(true);
+  requestAnimationFrame(animate);
+}
+animate();
