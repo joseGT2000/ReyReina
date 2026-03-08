@@ -27,10 +27,29 @@ function updateRope() {
   const kc = getCenter(king);
   const qc = getCenter(queen);
 
-  rope.setAttribute("x1", kc.x);
-  rope.setAttribute("y1", kc.y);
-  rope.setAttribute("x2", qc.x);
-  rope.setAttribute("y2", qc.y);
+  // punto medio entre rey y reina
+  const midX = (kc.x + qc.x) / 2;
+  const midY = (kc.y + qc.y) / 2;
+
+  // calculamos una pequeña curvatura hacia abajo
+  const dx = qc.x - kc.x;
+  const dy = qc.y - kc.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  // cuanto mayor la distancia, más “panza” hace la cuerda
+  const curveAmount = Math.min(60, dist * 0.15); // ajusta a gusto
+
+  // vector perpendicular normalizado (para curvar la cuerda)
+  const nx = -dy / (dist || 1);
+  const ny = dx / (dist || 1);
+
+  // control point = punto medio + perpendicular * curva
+  const cx = midX + nx * curveAmount;
+  const cy = midY + ny * curveAmount;
+
+  // path cuadrático Bézier: M inicio, Q control, fin
+  const d = `M ${kc.x} ${kc.y} Q ${cx} ${cy} ${qc.x} ${qc.y}`;
+  rope.setAttribute("d", d);
 }
 
 function clampToBoard(left, top, el) {
