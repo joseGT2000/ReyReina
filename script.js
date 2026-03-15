@@ -37,10 +37,8 @@ function updateRope(applyPhysics = true) {
   const nx = -dy / dist;
   const ny = dx / dist;
 
-  const sag = Math.min(200, dist * 0.4);
-
-  const cx = midX;
-  const cy = midY + sag;
+  const cx = midX + nx * curveAmount;
+  const cy = midY + ny * curveAmount;
 
   rope.setAttribute("d", `M ${kc.x} ${kc.y} Q ${cx} ${cy} ${qc.x} ${qc.y}`);
 
