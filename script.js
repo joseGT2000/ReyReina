@@ -130,11 +130,17 @@ firebaseOnValue(dbRef, snapshot => {
   const data = snapshot.val();
 
   if (!data) {
-    firebaseSet(dbRef, getPositions());
+
+    const initial = getPositions();
+    firebaseSet(dbRef, initial);
+
+    applyPositions(initial);
+
     return;
   }
 
   if (!dragging) applyPositions(data);
+
 });
 
 // -------- drag --------
