@@ -14,7 +14,30 @@
 </svg>
 
   </div>
+<script type="module">
 
-  <script src="script.js"></script>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_XVwWrgVb7psf9ecREFfVw3qOxbxdVrc",
+    authDomain: "reyreina-bb5dd.firebaseapp.com",
+    databaseURL: "https://reyreina-bb5dd-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "reyreina-bb5dd",
+    storageBucket: "reyreina-bb5dd.firebasestorage.app",
+    messagingSenderId: "824618035025",
+    appId: "1:824618035025:web:eaf8238118e8f5d0a6d570"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  window.firebaseDB = db;
+  window.firebaseRef = ref;
+  window.firebaseSet = set;
+  window.firebaseOnValue = onValue;
+
+</script>
+<script src="script.js"></script>
 </body>
 </html>
