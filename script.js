@@ -128,6 +128,7 @@ const dbRef = firebaseRef(firebaseDB, "positions");
 firebaseOnValue(dbRef, snapshot => {
 
   const data = snapshot.val();
+  console.log("Firebase data:", data);
 
   if (!data) {
 
