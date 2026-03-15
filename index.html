@@ -1,43 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rey y reina conectados</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>Rey y Reina</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div id="board">
-    <div id="king" class="piece">♚</div>
-    <div id="queen" class="piece">♛</div>
-    <svg id="rope-svg">
-  <path id="rope" d="" />
-</svg>
 
-  </div>
-<script type="module">
+<div id="board">
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_XVwWrgVb7psf9ecREFfVw3qOxbxdVrc",
-    authDomain: "reyreina-bb5dd.firebaseapp.com",
-    databaseURL: "https://reyreina-bb5dd-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "reyreina-bb5dd",
-    storageBucket: "reyreina-bb5dd.firebasestorage.app",
-    messagingSenderId: "824618035025",
-    appId: "1:824618035025:web:eaf8238118e8f5d0a6d570"
-  };
-  
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  
-  window.firebaseDB = db;
-  window.firebaseRef = ref;
-  window.firebaseSet = set;
-  window.firebaseOnValue = onValue;
+  <div id="king" class="piece">♚</div>
+  <div id="queen" class="piece">♛</div>
 
-</script>
-<script src="script.js"></script>
+  <svg id="rope-svg">
+    <path id="rope"></path>
+  </svg>
+
+</div>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
