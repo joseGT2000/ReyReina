@@ -92,6 +92,7 @@ function movePieceByCenter(el, centerX, centerY, fromPhysics = false) {
 // ---------- localStorage ----------
 
 function savePositions() {
+
   const kingRect = king.getBoundingClientRect();
   const queenRect = queen.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
@@ -107,7 +108,7 @@ function savePositions() {
     }
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  firebaseSet(firebaseRef(firebaseDB, "positions"), data);
 }
 
 function loadPositions() {
@@ -215,3 +216,23 @@ function animate() {
   updateRope(dragging !== null); // solo aplica física si se arrastra
   requestAnimationFrame(animate);
 }
+function listenPositions() {
+
+  firebaseOnValue(firebaseRef(firebaseDB, "positions"), (snapshot) => {
+
+    const data = snapshot.val();
+    if (!data) return;
+
+    king.style.left = data.king.left + "px";
+    king.style.top = data.king.top + "px";
+
+    queen.style.left = data.queen.left + "px";
+    queen.style.top = data.queen.top + "px";
+
+    updateRope(false);
+
+  });
+
+}
+
+listenPositions();
